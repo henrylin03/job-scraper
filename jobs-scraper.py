@@ -8,27 +8,24 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 
 
-search_url = "https://www.seek.com.au/business-analyst-jobs/in-All-Sydney-NSW"
+url_indeed = "https://au.indeed.com/"
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
 
-def extract_job_info():
-    for i in range(1, 23):
-        driver.execute_script(
-            "arguments[0].click();",
-            driver.find_element(
-                By.XPATH,
-                f'//*[@id="app"]/div/div[4]/div/section/div[2]/div/div[2]/div[1]/div/div/div[2]/div[{i}]/div/article/div[2]/a',
-            ),
-        )
-    # //*[@id="app"]/div/div[4]/div/section/div[2]/div/div[2]/div[1]/div/div/div[2]/div[1]/div/article/div[2]/a
-    # //*[@id="app"]/div/div[4]/div/section/div[2]/div/div[2]/div[1]/div/div/div[2]/div[22]/div/article/div[2]/a
+def search(what, where):
+    search_what = driver.find_element(By.XPATH, '//*[@id="text-input-what"]').send_keys(
+        what
+    )
+    search_where = driver.find_element(
+        By.XPATH, '//*[@id="text-input-where"]'
+    ).send_keys(where)
+    submit_search = driver.find_element(By.XPATH, '//*[@id="jobsearch"]/button').click()
 
 
 def main():
     # open given url (later, can have sign-in options, search-bar etc)
-    driver.get(search_url)
-    extract_job_info()
+    driver.get(url_indeed)
+    search("business analyst", "sydney")
 
 
 if __name__ == "__main__":

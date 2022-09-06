@@ -13,13 +13,11 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
 
 def search(what, where):
-    search_what = driver.find_element(By.XPATH, '//*[@id="text-input-what"]').send_keys(
-        what
-    )
-    search_where = driver.find_element(
-        By.XPATH, '//*[@id="text-input-where"]'
-    ).send_keys(where)
-    submit_search = driver.find_element(By.XPATH, '//*[@id="jobsearch"]/button').click()
+    what_searchbox = driver.find_element(By.XPATH, '//*[@id="text-input-what"]')
+    where_searchbox = driver.find_element(By.XPATH, '//*[@id="text-input-where"]')
+    ActionChains(driver).send_keys_to_element(
+        what_searchbox, what
+    ).send_keys_to_element(where_searchbox, where).send_keys(Keys.ENTER).perform()
 
 
 def main():

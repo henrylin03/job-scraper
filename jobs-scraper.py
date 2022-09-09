@@ -8,36 +8,36 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 
 
-url_indeed = "https://au.indeed.com/"
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+URL_INDEED = "https://au.indeed.com/"
+DRIVER = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
 
 def search(what, where):
-    what_searchbox = driver.find_element(By.XPATH, '//*[@id="text-input-what"]')
-    where_searchbox = driver.find_element(By.XPATH, '//*[@id="text-input-where"]')
-    ActionChains(driver).send_keys_to_element(
+    what_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-what"]')
+    where_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-where"]')
+    ActionChains(DRIVER).send_keys_to_element(
         what_searchbox, what
     ).send_keys_to_element(where_searchbox, where).send_keys(Keys.ENTER).perform()
 
 
 def extract_job_info():
-    jobs = driver.find_elements(
+    jobs = DRIVER.find_elements(
         By.XPATH, '//div[@class="slider_container css-g7s71f eu4oa1w0"]'
     )
-    for job in jobs:
-        job_title = job.find_element(
-            By.XPATH, ".//*[starts-with(@id, 'jobTitle')]"
-        ).text
-        print(job_title)
-
-
-# '//*[@id="mosaic-provider-jobcards"]/ul/li[11]/div'
-# '//*[@id="mosaic-provider-jobcards"]/ul/li[13]/div'
+    for j in jobs:
+        j.click()
+        job_title = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]").text
+        job_poster = j.find_element(By.CLASS_NAME, "companyName").text
+        location = j.find_element(By.CLASS_NAME, "companyLocation").text
+        # salary_estimate = j.find_element(
+        #     By.XPATH, ".//*[starts-with(@id, 'salaryInfoAndJobType')]"
+        # ).text
+        print(job_title, job_poster, location, sep=" - ")
 
 
 def main():
     # open given url (later, can have sign-in options, search-bar etc)
-    driver.get(url_indeed)
+    DRIVER.get(URL_INDEED)
     search("business analyst", "sydney")
     extract_job_info()
 

@@ -7,6 +7,7 @@ from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+import openpyxl
 
 
 URL_INDEED = "https://au.indeed.com/"
@@ -82,11 +83,9 @@ def extract_job_info():
     return jobs_list
 
 
-##! need to add link to jobs
-
-
 def convert_to_df(jobs_list):
-    pass
+    df = pd.DataFrame(jobs_list)
+    return df
 
 
 def main():
@@ -94,6 +93,7 @@ def main():
     search(what="business analyst remote", where="australia")
     jobs_list = extract_job_info()
     df = convert_to_df(jobs_list)
+    df.to_excel("output.xlsx", index=False)
 
 
 if __name__ == "__main__":

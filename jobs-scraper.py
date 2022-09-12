@@ -14,7 +14,8 @@ URL_INDEED = "https://au.indeed.com/"
 
 
 def setup_chrome_driver():
-    options = Options()
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
     return webdriver.Chrome(
         options=options, service=Service(ChromeDriverManager().install())
     )
@@ -67,11 +68,13 @@ def extract_job_info():
                     By.ID, "jobDescriptionText"
                 ).text
             except NoSuchElementException:
-                jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
-                ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-                job_description = jobs_expanded.find_element(
+                description_element = DRIVER.find_element(
+                    By.ID, "vjs-container"
+                ).find_element(
                     By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
-                ).text
+                )
+                ActionChains(DRIVER).move_to_element(description_element).perform()
+                job_description = description_element.text
         jobs_dict = {
             "title": title_link.text,
             "poster": poster,

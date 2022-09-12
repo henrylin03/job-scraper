@@ -47,11 +47,27 @@ def extract_job_info():
             ).text
         except NoSuchElementException:
             salary_estimate = ""
-        # jobs_expanded = DRIVER.find_element(By.CLASS_NAME, "jobsearch-RightPane")
-        # job_description = jobs_expanded.find_element(
-        #     By.CLASS_NAME, "jobsearch-jobDescriptionText"
-        # ).text
-        print(title, poster, location, salary_estimate, sep=" - ")
+
+        try:
+            jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
+            job_description = jobs_expanded.find_element(
+                By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
+            ).text
+        except NoSuchElementException:
+            jobs_expanded = DRIVER.find_element(By.CLASS_NAME, "jobsearch-RightPane")
+            job_description = jobs_expanded.find_element(
+                By.ID, "jobDescriptionText"
+            ).text
+        print(
+            "\n",
+            title,
+            poster,
+            location,
+            salary_estimate,
+            job_description,
+            "\n",
+            sep="\n",
+        )
 
 
 # right pane

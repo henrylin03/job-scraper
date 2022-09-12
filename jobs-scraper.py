@@ -14,7 +14,6 @@ URL_INDEED = "https://au.indeed.com/"
 
 def setup_chrome_driver():
     options = Options()
-    options.add_argument("window-size=1920,1080")
     return webdriver.Chrome(
         options=options, service=Service(ChromeDriverManager().install())
     )
@@ -47,7 +46,6 @@ def extract_job_info():
             ).text
         except NoSuchElementException:
             salary_estimate = ""
-
         try:
             jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
             job_description = jobs_expanded.find_element(
@@ -58,28 +56,11 @@ def extract_job_info():
             job_description = jobs_expanded.find_element(
                 By.ID, "jobDescriptionText"
             ).text
-        print(
-            "\n",
-            title,
-            poster,
-            location,
-            salary_estimate,
-            job_description,
-            "\n",
-            sep="\n",
-        )
-
-
-# right pane
-'//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
-'//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
 
 
 def main():
     DRIVER.get(URL_INDEED)
-    search(
-        "business analyst remote", "australia"
-    )  # have conditional that if the word "remote" is in the name to also filter on "remote" to not only rely on the keywords to search
+    search(what="business analyst remote", where="australia")
     extract_job_info()
 
 

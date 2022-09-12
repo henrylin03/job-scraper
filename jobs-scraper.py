@@ -31,6 +31,8 @@ def search(what, where):
 
 
 def extract_job_info():
+    jobs_list = []
+
     jobs = DRIVER.find_elements(
         By.XPATH, '//*[@class="slider_container css-g7s71f eu4oa1w0"]'
     )
@@ -47,21 +49,47 @@ def extract_job_info():
         except NoSuchElementException:
             salary_estimate = ""
         try:
-            jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
+            jobs_expanded = DRIVER.find_element(
+                By.XPATH, '//*[@id="viewJobSSRRoot"]/div[2]/div/div/div/div/div[1]/div'
+            )
+            ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
             job_description = jobs_expanded.find_element(
-                By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
+                By.XPATH, './/*[@id="jobDescriptionText"]'
             ).text
+
         except NoSuchElementException:
-            jobs_expanded = DRIVER.find_element(By.CLASS_NAME, "jobsearch-RightPane")
-            job_description = jobs_expanded.find_element(
-                By.ID, "jobDescriptionText"
-            ).text
+            try:
+                jobs_expanded = DRIVER.find_element(
+                    By.XPATH, '//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
+                )
+                ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
+                job_description = jobs_expanded.find_element(
+                    By.ID, "jobDescriptionText"
+                ).text
+            except NoSuchElementException:
+                jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
+                ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
+                job_description = jobs_expanded.find_element(
+                    By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
+                ).text
+        jobs_dict = {
+            "title": title,
+            "poster": poster,
+            "estimated pay": salary_estimate,
+            "description": job_description,
+        }
+        jobs_list.append(jobs_dict)
+    return jobs_list
+
+
+##! need to add link to jobs
 
 
 def main():
     DRIVER.get(URL_INDEED)
     search(what="business analyst remote", where="australia")
-    extract_job_info()
+    jobs_list = extract_job_info()
+    print(jobs_list)
 
 
 if __name__ == "__main__":

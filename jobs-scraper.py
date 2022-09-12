@@ -21,24 +21,32 @@ def search(what, where):
 
 
 def extract_job_info():
-    jobs = DRIVER.find_elements(
-        By.XPATH, '//div[@class="slider_container css-g7s71f eu4oa1w0"]'
-    )
+    # jobs = DRIVER.find_elements(
+    #     By.XPATH, '//div[@class="slider_container css-g7s71f eu4oa1w0"]'
+    # )
+    jobs = DRIVER.find_elements(By.CLASS_NAME, "job_seen_beacon")
     for j in jobs:
-        j.click()
+        DRIVER.execute_script("arguments[0].click();", j)
         job_title = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]").text
         job_poster = j.find_element(By.CLASS_NAME, "companyName").text
         location = j.find_element(By.CLASS_NAME, "companyLocation").text
-        # salary_estimate = j.find_element(
-        #     By.XPATH, ".//*[starts-with(@id, 'salaryInfoAndJobType')]"
-        # ).text
-        print(job_title, job_poster, location, sep=" - ")
+        try:
+            # salary_estimate = j.find_element(By.CLASS_NAME, "attribute_snippet").text
+            salary_estimate = j.find_element(
+                By.XPATH, './/div[@class="metadata salary-snippet-container"]'
+            ).text
+        except NoSuchElementException:
+            salary_estimate = ""
+        print(job_title, job_poster, location, salary_estimate, sep=" - ")
+
+
+'//*[@id="mosaic-provider-jobcards"]/ul/li[8]/div/div[1]/div/div[1]/div/table[1]/tbody/tr/td/div[3]/div[1]'
 
 
 def main():
     # open given url (later, can have sign-in options, search-bar etc)
     DRIVER.get(URL_INDEED)
-    search("business analyst", "sydney")
+    search("business analyst remote", "australia")
     extract_job_info()
 
 

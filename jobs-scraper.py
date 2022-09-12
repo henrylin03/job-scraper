@@ -39,7 +39,6 @@ def extract_job_info():
     for j in jobs:
         title_link = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]")
         DRIVER.execute_script("arguments[0].click();", title_link)
-        title = title_link.text
         poster = j.find_element(By.CLASS_NAME, "companyName").text
         location = j.find_element(By.CLASS_NAME, "companyLocation").text
         try:
@@ -73,10 +72,11 @@ def extract_job_info():
                     By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
                 ).text
         jobs_dict = {
-            "title": title,
+            "title": title_link.text,
             "poster": poster,
             "estimated pay": salary_estimate,
             "description": job_description,
+            "link": DRIVER.current_url,
         }
         jobs_list.append(jobs_dict)
     return jobs_list
@@ -85,11 +85,15 @@ def extract_job_info():
 ##! need to add link to jobs
 
 
+def convert_to_df(jobs_list):
+    pass
+
+
 def main():
     DRIVER.get(URL_INDEED)
     search(what="business analyst remote", where="australia")
     jobs_list = extract_job_info()
-    print(jobs_list)
+    df = convert_to_df(jobs_list)
 
 
 if __name__ == "__main__":

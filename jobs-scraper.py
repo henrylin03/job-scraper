@@ -78,8 +78,9 @@ def extract_job_info():
         jobs_dict = {
             "title": title_link.text,
             "poster": poster,
-            "estimated pay": salary_estimate,
+            "location": location,
             "description": job_description,
+            "estimated pay": salary_estimate,
             "link": DRIVER.current_url,
         }
         jobs_list.append(jobs_dict)

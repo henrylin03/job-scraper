@@ -10,9 +10,6 @@ import pandas as pd
 import openpyxl
 
 
-URL_INDEED = "https://au.indeed.com/"
-
-
 def setup_chrome_driver():
     options = webdriver.ChromeOptions()
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
@@ -30,11 +27,27 @@ def search(what, where):
     ActionChains(DRIVER).send_keys_to_element(
         what_searchbox, what
     ).send_keys_to_element(where_searchbox, where).send_keys(Keys.ENTER).perform()
+    return DRIVER.current_url
+
+
+def extract_pages(page1_url, page_count=3):
+    if page_count == 1:
+        df = extract_job_info()
+        df.to_excel("output.xlsx", index=False)
+    elif page_count > 1:
+        df_list = []
+        for i in range(0, page_count * 10, 10):
+            page_url = page1_url + f"&start={i}"
+            DRIVER.get(page_url)
+            df_list.append(extract_job_info())
+            concatted_df = pd.concat(df_list)
+            concatted_df.to_excel("output.xlsx", index=False)
+    else:
+        raise Exception("Please enter a valid integer greater than 0")
 
 
 def extract_job_info():
     jobs_list = []
-
     jobs = DRIVER.find_elements(
         By.XPATH, '//*[@class="slider_container css-g7s71f eu4oa1w0"]'
     )
@@ -57,7 +70,6 @@ def extract_job_info():
             job_description = jobs_expanded.find_element(
                 By.XPATH, './/*[@id="jobDescriptionText"]'
             ).text
-
         except NoSuchElementException:
             try:
                 jobs_expanded = DRIVER.find_element(
@@ -84,20 +96,13 @@ def extract_job_info():
             "link": DRIVER.current_url,
         }
         jobs_list.append(jobs_dict)
-    return jobs_list
-
-
-def convert_to_df(jobs_list):
-    df = pd.DataFrame(jobs_list)
-    return df
+    return pd.DataFrame(jobs_list)
 
 
 def main():
-    DRIVER.get(URL_INDEED)
-    search(what="business analyst remote", where="australia")
-    jobs_list = extract_job_info()
-    df = convert_to_df(jobs_list)
-    df.to_excel("output.xlsx", index=False)
+    DRIVER.get("https://au.indeed.com/")
+    search_url = search("senior business analyst remote", "australia")
+    extract_pages(search_url, 5)
 
 
 if __name__ == "__main__":

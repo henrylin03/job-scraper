@@ -33,17 +33,19 @@ def search(what, where):
 def extract_pages(page1_url, page_count=3):
     if page_count == 1:
         df = extract_job_info()
-        df.to_excel("output.xlsx", index=False)
     elif page_count > 1:
         df_list = []
-        for i in range(0, page_count * 10, 10):
+        for i in range(0, (page_count - 1) * 10, 10):
             page_url = page1_url + f"&start={i}"
             DRIVER.get(page_url)
             df_list.append(extract_job_info())
-            concatted_df = pd.concat(df_list)
-            concatted_df.to_excel("output.xlsx", index=False)
+            df = pd.concat(df_list)
     else:
         raise Exception("Please enter a valid integer greater than 0")
+    df_cleaned = df.drop_duplicates().apply(
+        lambda x: x.str.strip() if x.dtype == "object" else x
+    )
+    df_cleaned.to_excel("output.xlsx", index=False)
 
 
 def extract_job_info():

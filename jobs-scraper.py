@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains
@@ -104,7 +103,7 @@ def extract_job_info():
 def main():
     DRIVER.get("https://au.indeed.com/")
     search_url = search("senior business analyst remote", "australia")
-    extract_pages(search_url, 5)
+    extract_pages(search_url, 0.5)
 
 
 if __name__ == "__main__":

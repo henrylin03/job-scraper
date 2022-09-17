@@ -1,4 +1,3 @@
-from ast import Pass
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -9,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+import xlsxwriter
 
 
 def setup_chrome_driver():
@@ -111,7 +111,7 @@ def scrape_pages(page1_url, page_count=1):
 
 
 def style_and_export_excel(df):
-    writer = pd.ExcelWriter("output.xlsx")
+    writer = pd.ExcelWriter("output.xlsx", engine="xlsxwriter")
     df.to_excel(writer, sheet_name="Indeed", startrow=2, index=False)
     workbook = writer.book
     worksheet = writer.sheets["Indeed"]

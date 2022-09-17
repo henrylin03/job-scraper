@@ -1,2 +1,2 @@
 # jobs-scraper
-Web-scraper to assist job search
+`jobs-scraper` scrapes job postings from [Indeed](https://au.indeed.com/), enabling a job-seeker to outsource the searching, filtering and tracking of job applications, and instead, focus more on the actual _**applying**_. 

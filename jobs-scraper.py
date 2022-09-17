@@ -43,6 +43,7 @@ def extract_job_info():
         WebDriverWait(DRIVER, 5).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="popover-x"]/button'))
         ).click()
+        DRIVER.execute_script("arguments[0].click();", jobs[0])
     except TimeoutException:
         pass
     for j in jobs:

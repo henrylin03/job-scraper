@@ -74,11 +74,20 @@ def extract_job_info():
                     By.ID, "jobDescriptionText"
                 )
             except NoSuchElementException:
-                jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
-                ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-                description_element = DRIVER.find_element(
-                    By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
-                )
+                try:
+                    jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
+                    ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
+                    description_element = jobs_expanded.find_element(
+                        By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
+                    )
+                except NoSuchElementException:
+                    jobs_expanded = DRIVER.find_element(
+                        By.CLASS_NAME, "jobsearch-JobComponent-embeddedBody"
+                    )
+                    ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
+                    description_element = jobs_expanded.find_element(
+                        By.ID, "jobDetailsSection"
+                    )
         ActionChains(DRIVER).move_to_element(description_element).perform()
         description_element.text
         jobs_dict = {
@@ -91,6 +100,19 @@ def extract_job_info():
         }
         jobs_list.append(jobs_dict)
     return pd.DataFrame(jobs_list)
+
+
+# def extract_job_description(job_result):
+#     try:
+#         right_pane = DRIVER.find_element(
+#             By.XPATH, '//*[@id="viewJobSSRRoot"]'
+#         )
+#     except NoSuchElementException:
+#         try:
+#             right_pane =
+#         except NoSuchElementException:
+
+#     return job_description
 
 
 def scrape_pages(page1_url, page_count=1):
@@ -138,17 +160,23 @@ def style_and_export_excel(df):
             worksheet.write(
                 r + 3, c, df.values[r, c], workbook.add_format({"border": 1})
             )
-    # set column width
-    for col in df:
-        col_length = max(df[col].astype(str).map(len).max(), len(col))
-        col_idx = df.columns.get_loc(col)
-        worksheet.set_column(col_idx, col_idx, col_length)
+    # modify columns' width and wrap text where appropriate
+    wrap_aligntop_format = workbook.add_format({"text_wrap": True, "valign": "top"})
+    aligntop_format = workbook.add_format({"valign": "top"})
+    for i, col in enumerate(df.columns):
+        if col.casefold() in map(str.casefold, ["Description"]):
+            worksheet.set_column(i, i, 81, wrap_aligntop_format)
+        elif col.casefold() in map(str.casefold, ["URL"]):
+            worksheet.set_column(i, i, 30, aligntop_format)
+        else:
+            worksheet.set_column(i, i, 30, wrap_aligntop_format)
+
     writer.save()
 
 
 def main():
     DRIVER.get("https://au.indeed.com/")
-    search_url = search("senior business analyst remote", "australia")
+    search_url = search("data engineer remote", "australia")
     df_cleaned = scrape_pages(search_url, 3)
     style_and_export_excel(df_cleaned)
 

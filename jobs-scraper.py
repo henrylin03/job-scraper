@@ -16,7 +16,7 @@ import openpyxl
 def setup_chrome_driver():
     options = webdriver.ChromeOptions()
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    # options.add_argument("--start-maximized")
+    options.add_argument("--start-maximized")
     return webdriver.Chrome(
         options=options, service=Service(ChromeDriverManager().install())
     )
@@ -65,7 +65,6 @@ def extract_job_info():
             description_element = jobs_expanded.find_element(
                 By.XPATH, './/*[@id="jobDescriptionText"]'
             )
-
         except NoSuchElementException:
             try:
                 jobs_expanded = DRIVER.find_element(
@@ -95,7 +94,7 @@ def extract_job_info():
     return pd.DataFrame(jobs_list)
 
 
-def extract_pages(page1_url, page_count=3):
+def extract_pages(page1_url, page_count=1):
     if page_count == 1:
         df = extract_job_info()
     elif page_count > 1:
@@ -116,7 +115,7 @@ def extract_pages(page1_url, page_count=3):
 def main():
     DRIVER.get("https://au.indeed.com/")
     search_url = search("senior business analyst remote", "australia")
-    extract_pages(search_url)
+    extract_pages(search_url, 3)
 
 
 if __name__ == "__main__":

@@ -8,9 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 import pandas as pd
-import openpyxl
 
 
 def setup_chrome_driver():
@@ -83,18 +81,18 @@ def extract_job_info():
         ActionChains(DRIVER).move_to_element(description_element).perform()
         description_element.text
         jobs_dict = {
-            "title": title_link.text,
-            "poster": poster,
-            "location": location,
-            "description": description_element.text,
-            "estimated pay": salary_estimate,
-            "link": DRIVER.current_url,
+            "Job Title": title_link.text,
+            "Job Poster": poster,
+            "Job Location": location,
+            "Description": description_element.text,
+            "Estimated Pay": salary_estimate,
+            "URL": DRIVER.current_url,
         }
         jobs_list.append(jobs_dict)
     return pd.DataFrame(jobs_list)
 
 
-def extract_pages(page1_url, page_count=1):
+def scrape_pages(page1_url, page_count=1):
     if page_count == 1:
         df = extract_job_info()
     elif page_count > 1:
@@ -109,13 +107,49 @@ def extract_pages(page1_url, page_count=1):
     df_cleaned = df.drop_duplicates().apply(
         lambda x: x.str.strip() if x.dtype == "object" else x
     )
-    df_cleaned.to_excel("output.xlsx", index=False)
+    return df_cleaned
+
+
+def style_and_export_excel(df):
+    writer = pd.ExcelWriter("output.xlsx")
+    df.to_excel(writer, sheet_name="Indeed", startrow=2, index=False)
+    workbook = writer.book
+    worksheet = writer.sheets["Indeed"]
+    # add title
+    worksheet.write(
+        0,
+        0,
+        "Indeed Jobs",
+        workbook.add_format({"bold": True, "color": "#2e196d", "size": 14}),
+    )
+    # format header row
+    header_format = workbook.add_format(
+        {"bold": True, "text_wrap": True, "fg_color": "#4f3589", "font_color": "white"}
+    )
+    [
+        worksheet.write(2, col_num, col_name, header_format)
+        for col_num, col_name in enumerate(df.columns.values)
+    ]
+    # add border to table
+    row_idx, col_idx = df.shape
+    for r in range(row_idx):
+        for c in range(col_idx):
+            worksheet.write(
+                r + 3, c, df.values[r, c], workbook.add_format({"border": 1})
+            )
+    # set column width
+    for col in df:
+        col_length = max(df[col].astype(str).map(len).max(), len(col))
+        col_idx = df.columns.get_loc(col)
+        worksheet.set_column(col_idx, col_idx, col_length)
+    writer.save()
 
 
 def main():
     DRIVER.get("https://au.indeed.com/")
     search_url = search("senior business analyst remote", "australia")
-    extract_pages(search_url, 3)
+    df_cleaned = scrape_pages(search_url, 3)
+    style_and_export_excel(df_cleaned)
 
 
 if __name__ == "__main__":

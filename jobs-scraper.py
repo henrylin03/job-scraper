@@ -38,13 +38,15 @@ def extract_job_info():
     jobs = DRIVER.find_elements(
         By.XPATH, '//*[@class="slider_container css-g7s71f eu4oa1w0"]'
     )
-    try:
-        WebDriverWait(DRIVER, 5).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="popover-x"]/button'))
-        ).click()
-        DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
-    except TimeoutException:
-        pass
+    current_url = DRIVER.current_url
+    if not "&start=" in current_url or current_url.endswith("&start=0"):
+        try:
+            WebDriverWait(DRIVER, 5).until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="popover-x"]/button'))
+            ).click()
+        except TimeoutException:
+            pass
+    DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
     for j in jobs:
         title_link = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]")
         DRIVER.execute_script("arguments[0].click();", title_link)
@@ -88,7 +90,9 @@ def extract_job_description():
                 right_pane = DRIVER.find_element(By.ID, "vjs-container")
     actions.move_to_element(right_pane).perform()
     try:
-        description_element = right_pane.find_element(By.ID, "jobDescriptionText")
+        description_element = right_pane.find_element(
+            By.CLASS_NAME, "jobsearch-jobDescriptionText"
+        )
     except NoSuchElementException:
         try:
             description_element = right_pane.find_element(
@@ -162,7 +166,7 @@ def style_and_export_excel(df):
 def main():
     DRIVER.get("https://au.indeed.com/")
     search_url = search("business analyst remote", "australia")
-    df_cleaned = scrape_pages(search_url, 1)
+    df_cleaned = scrape_pages(search_url, 3)
     style_and_export_excel(df_cleaned)
     DRIVER.close()
 

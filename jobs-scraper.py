@@ -129,7 +129,7 @@ def style_and_export_excel(df):
         0,
         0,
         "Indeed Jobs",
-        workbook.add_format({"bold": True, "color": "#2e196d", "size": 14}),
+        workbook.add_format({"bold": True, "color": "#4f3589", "size": 14}),
     )
     # format header row
     header_format = workbook.add_format(

@@ -17,7 +17,7 @@ Currently, `job-scraper` automates job scraping in Google Chrome.
 
 Please install all packages in `requirements.txt`:
 
-```bash
+```zsh
 pip install -r requirements.txt
 ```
 
@@ -40,13 +40,18 @@ search("data analyst", "australia")
    E.g. the following will extract information from the first 5 pages of search results:
 
 ```python
-scrape_pages(search_url, 5)
+scrape_pages("url", 5)
 ```
 
-3. Run the script.
+3. Run the script to install ChromeDriver through `ChromeDriverManager().install()`.
+4. The script will then extract job posting information as a `pandas.DataFrame`, and export as an Excel workbook (`output.xlsx`).
 
-## How to contribute
+<p align="center">
+    <img src="./img/output_sample_screenshot.png">
+</p>
 
-## Credits
+To edit the look-and-feel of the output Excel workbook, please feel free to modify the `.add_format()` arguments in the variables.
 
 ## Licence
+
+MIT

@@ -21,14 +21,15 @@ def setup_chrome_driver():
 
 
 DRIVER = setup_chrome_driver()
+actions = ActionChains(DRIVER)
 
 
 def search(what, where):
     what_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-what"]')
     where_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-where"]')
-    ActionChains(DRIVER).send_keys_to_element(
-        what_searchbox, what
-    ).send_keys_to_element(where_searchbox, where).send_keys(Keys.ENTER).perform()
+    actions.send_keys_to_element(what_searchbox, what).send_keys_to_element(
+        where_searchbox, where
+    ).send_keys(Keys.ENTER).perform()
     return DRIVER.current_url
 
 
@@ -41,9 +42,9 @@ def extract_job_info():
         WebDriverWait(DRIVER, 5).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="popover-x"]/button'))
         ).click()
-        jobs[0].click()
     except TimeoutException:
         pass
+    DRIVER.send_keys(Keys.PAGE_DOWN)
     for j in jobs:
         title_link = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]")
         DRIVER.execute_script("arguments[0].click();", title_link)
@@ -69,10 +70,10 @@ def extract_job_info():
 
 
 def extract_job_description():
-    actions = ActionChains(DRIVER)
     try:
         right_pane = DRIVER.find_element(
-            By.XPATH, '//*[@id="viewJobSSRRoot"]/div[2]/div/div'
+            By.XPATH,
+            '//*[@id="viewJobSSRRoot"]',
         )
     except NoSuchElementException:
         try:
@@ -88,16 +89,14 @@ def extract_job_description():
                 right_pane = DRIVER.find_element(By.ID, "vjs-container")
     actions.move_to_element(right_pane).perform()
     try:
-        description_element = DRIVER.find_element(
-            By.XPATH, '//*[@id="jobDescriptionText"]'
-        )
+        description_element = right_pane.find_element(By.ID, "jobDescriptionText")
     except NoSuchElementException:
         try:
-            description_element = DRIVER.find_element(
+            description_element = right_pane.find_element(
                 By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
             )
         except NoSuchElementException:
-            description_element = DRIVER.find_element(By.ID, "jobDetailsSection")
+            description_element = right_pane.find_element(By.ID, "jobDetailsSection")
     actions.move_to_element(description_element).perform()
     return description_element.text
 
@@ -134,37 +133,38 @@ def style_and_export_excel(df):
     )
     # format header row
     header_format = workbook.add_format(
-        {"bold": True, "text_wrap": True, "fg_color": "#4f3589", "font_color": "white"}
+        {"bold": True, "fg_color": "#4f3589", "font_color": "white"}
     )
     [
         worksheet.write(2, col_num, col_name, header_format)
         for col_num, col_name in enumerate(df.columns.values)
     ]
-    # add border to table
+    # add border to table, and text align to top
     row_idx, col_idx = df.shape
     for r in range(row_idx):
         for c in range(col_idx):
             worksheet.write(
-                r + 3, c, df.values[r, c], workbook.add_format({"border": 1})
+                r + 3,
+                c,
+                df.values[r, c],
+                workbook.add_format({"border": 1, "valign": "top", "text_wrap": True}),
             )
     # modify columns' width and wrap text where appropriate
-    wrap_aligntop_format = workbook.add_format({"text_wrap": True, "valign": "top"})
-    aligntop_format = workbook.add_format({"valign": "top"})
     for i, col in enumerate(df.columns):
         if col.casefold() in map(str.casefold, ["Description"]):
-            worksheet.set_column(i, i, 81, wrap_aligntop_format)
+            worksheet.set_column(i, i, 81)
         elif col.casefold() in map(str.casefold, ["URL"]):
-            worksheet.set_column(i, i, 30, aligntop_format)
+            worksheet.set_column(i, i, 30)
         else:
-            worksheet.set_column(i, i, 30, wrap_aligntop_format)
+            worksheet.set_column(i, i, 30)
 
     writer.save()
 
 
 def main():
     DRIVER.get("https://au.indeed.com/")
-    search_url = search("data engineer remote", "australia")
-    df_cleaned = scrape_pages(search_url, 3)
+    search_url = search("business analyst remote", "australia")
+    df_cleaned = scrape_pages(search_url, 1)
     style_and_export_excel(df_cleaned)
     DRIVER.close()
 

@@ -13,9 +13,8 @@
 
 Currently, `job-scraper` automates job scraping in Google Chrome.
 <br>
-<br>
 
-### Challenges
+### Challenges & resolutions
 
 <details><summary>Click to expand</summary>
 <br>Among others, there were two major challenges in this project:
@@ -47,8 +46,8 @@ DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
 <br>
 
 ### Future features
-
 <details><summary>Click to expand</summary>
+<br>
 In the future, I will look to:
 
 1. Extract job postings from other job posting sites. For readability, this likely requires introducing Object Oriented Programming (OOP), with a Python class for each site.

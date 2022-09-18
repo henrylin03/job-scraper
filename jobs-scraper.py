@@ -44,7 +44,7 @@ def extract_job_info():
         ).click()
     except TimeoutException:
         pass
-    DRIVER.send_keys(Keys.PAGE_DOWN)
+    DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
     for j in jobs:
         title_link = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]")
         DRIVER.execute_script("arguments[0].click();", title_link)

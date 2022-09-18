@@ -15,7 +15,35 @@ Currently, `job-scraper` automates job scraping in Google Chrome.
 
 ## How to install
 
+Please install all packages in `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## How to use
+
+1. In `main`, update the `search_url` function with the **key words (_`what=`_), and location (_`where=`_) to search** as strings.
+
+   E.g. to search for "data analyst" positions in "Australia":
+
+```python
+search("data analyst", "australia")
+```
+
+<p align="center">
+  <img src="./img/indeed_search_screenshot.png">
+</p>
+
+2. In `main`, update the 2nd argument of the `scrape_pages` function with the **number of pages** to extract job information with a positive integer. By default, the `scrape_pages` function extracts from the first page only.
+
+   E.g. the following will extract information from the first 5 pages of search results:
+
+```python
+scrape_pages(search_url, 5)
+```
+
+3. Run the script.
 
 ## How to contribute
 

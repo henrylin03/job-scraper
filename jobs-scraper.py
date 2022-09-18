@@ -42,10 +42,9 @@ def extract_job_info():
         WebDriverWait(DRIVER, 5).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="popover-x"]/button'))
         ).click()
-        DRIVER.execute_script("arguments[0].click();", jobs[0])
+        DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
     except TimeoutException:
         pass
-    DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
     for j in jobs:
         title_link = j.find_element(By.XPATH, ".//*[starts-with(@id, 'jobTitle')]")
         DRIVER.execute_script("arguments[0].click();", title_link)
@@ -71,16 +70,15 @@ def extract_job_info():
 
 
 def extract_job_description():
+    DRIVER.find_element(By.TAG_NAME, "html").send_keys(Keys.PAGE_DOWN)
     try:
         right_pane = DRIVER.find_element(
-            By.XPATH,
-            '//*[@id="viewJobSSRRoot"]',
+            By.ID,
+            "viewJobSSRRoot",
         )
     except NoSuchElementException:
         try:
-            right_pane = DRIVER.find_element(
-                By.XPATH, '//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
-            )
+            right_pane = DRIVER.find_element(By.CLASS_NAME, "jobsearch-RightPane")
         except NoSuchElementException:
             try:
                 right_pane = DRIVER.find_element(
@@ -98,7 +96,6 @@ def extract_job_description():
             )
         except NoSuchElementException:
             description_element = right_pane.find_element(By.ID, "jobDetailsSection")
-    actions.move_to_element(description_element).perform()
     return description_element.text
 
 

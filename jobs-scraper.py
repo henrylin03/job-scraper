@@ -55,46 +55,12 @@ def extract_job_info():
             ).text
         except NoSuchElementException:
             salary_estimate = ""
-        try:
-            jobs_expanded = DRIVER.find_element(
-                By.XPATH,
-                '//*[@id="viewJobSSRRoot"]',
-            )
-            ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-            description_element = jobs_expanded.find_element(
-                By.XPATH, './/*[@id="jobDescriptionText"]'
-            )
-        except NoSuchElementException:
-            try:
-                jobs_expanded = DRIVER.find_element(
-                    By.XPATH, '//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
-                )
-                ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-                description_element = jobs_expanded.find_element(
-                    By.ID, "jobDescriptionText"
-                )
-            except NoSuchElementException:
-                try:
-                    jobs_expanded = DRIVER.find_element(By.ID, "vjs-container")
-                    ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-                    description_element = jobs_expanded.find_element(
-                        By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
-                    )
-                except NoSuchElementException:
-                    jobs_expanded = DRIVER.find_element(
-                        By.CLASS_NAME, "jobsearch-JobComponent-embeddedBody"
-                    )
-                    ActionChains(DRIVER).move_to_element(jobs_expanded).perform()
-                    description_element = jobs_expanded.find_element(
-                        By.ID, "jobDetailsSection"
-                    )
-        ActionChains(DRIVER).move_to_element(description_element).perform()
-        description_element.text
+        job_description = extract_job_description()
         jobs_dict = {
             "Job Title": title_link.text,
             "Job Poster": poster,
             "Job Location": location,
-            "Description": description_element.text,
+            "Description": job_description,
             "Estimated Pay": salary_estimate,
             "URL": DRIVER.current_url,
         }
@@ -102,17 +68,38 @@ def extract_job_info():
     return pd.DataFrame(jobs_list)
 
 
-# def extract_job_description(job_result):
-#     try:
-#         right_pane = DRIVER.find_element(
-#             By.XPATH, '//*[@id="viewJobSSRRoot"]'
-#         )
-#     except NoSuchElementException:
-#         try:
-#             right_pane =
-#         except NoSuchElementException:
-
-#     return job_description
+def extract_job_description():
+    actions = ActionChains(DRIVER)
+    try:
+        right_pane = DRIVER.find_element(
+            By.XPATH, '//*[@id="viewJobSSRRoot"]/div[2]/div/div'
+        )
+    except NoSuchElementException:
+        try:
+            right_pane = DRIVER.find_element(
+                By.XPATH, '//*[@id="jobsearch-JapanPage"]/div/div/div[5]/div[2]'
+            )
+        except NoSuchElementException:
+            try:
+                right_pane = DRIVER.find_element(
+                    By.CLASS_NAME, "jobsearch-JobComponent-embeddedBody"
+                )
+            except NoSuchElementException:
+                right_pane = DRIVER.find_element(By.ID, "vjs-container")
+    actions.move_to_element(right_pane).perform()
+    try:
+        description_element = DRIVER.find_element(
+            By.XPATH, '//*[@id="jobDescriptionText"]'
+        )
+    except NoSuchElementException:
+        try:
+            description_element = DRIVER.find_element(
+                By.XPATH, './/*[@class="jobsearch-JobComponent-embeddedBody"]'
+            )
+        except NoSuchElementException:
+            description_element = DRIVER.find_element(By.ID, "jobDetailsSection")
+    actions.move_to_element(description_element).perform()
+    return description_element.text
 
 
 def scrape_pages(page1_url, page_count=1):
@@ -179,6 +166,7 @@ def main():
     search_url = search("data engineer remote", "australia")
     df_cleaned = scrape_pages(search_url, 3)
     style_and_export_excel(df_cleaned)
+    DRIVER.close()
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ def search(what, where):
         By.XPATH, '//input[@aria-describedby="keywords-input-aria-description"]'
     )
     where_searchbox = DRIVER.find_element(
-        By.XPATH, './/input[@aria-describedby="SearchBar__Where-aria-description"]'
+        By.XPATH, '//input[@aria-describedby="SearchBar__Where-aria-description"]'
     )
     actions.send_keys_to_element(what_searchbox, what).send_keys_to_element(
         where_searchbox, where
@@ -38,15 +38,30 @@ def search(what, where):
     return DRIVER.current_url
 
 
-def extract_job_info():
-    jobs = DRIVER.find_elements(By.XPATH, './/div[@class="_1wkzzau0 a1msqi6i"]')
-    print(jobs)
-    print([j.text for j in jobs])
+def extract_info_from_page(url):
+    jobs = DRIVER.find_elements(By.XPATH, './/div[starts-with(@class, "_1wkzzau0 ")]')
+    WebDriverWait(DRIVER, 5).until(
+        EC.visibility_of_element_located(
+            (By.XPATH, './/a[@data-automation="jobTitle"]')
+        )
+    )
+    for j in jobs:
+        title = j.find_element(By.XPATH, './/a[@data-automation="jobTitle"]').text
+        poster = j.find_element(By.XPATH, './/a[@data-automation="jobCompany"]').text
+        location = extract_job_location(j)
+        print(title, poster, location)
 
 
 DRIVER.get("https://seek.com.au")
 url = search("senior business analyst", "sydney")
-extract_job_info()
+extract_info_from_page(url)
+
+
+def extract_job_location(job_elem):
+    location_elems = job_elem.find_element(
+        By.XPATH, ".//a[@data-automation='jobLocation']"
+    )
+    print(location_elems)
 
 
 #     where_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-where"]')

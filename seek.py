@@ -40,28 +40,25 @@ def search(what, where):
 
 def extract_info_from_page(url):
     jobs = DRIVER.find_elements(By.XPATH, './/div[starts-with(@class, "_1wkzzau0 ")]')
-    WebDriverWait(DRIVER, 5).until(
-        EC.visibility_of_element_located(
-            (By.XPATH, './/a[@data-automation="jobTitle"]')
-        )
-    )
     for j in jobs:
-        title = j.find_element(By.XPATH, './/a[@data-automation="jobTitle"]').text
-        poster = j.find_element(By.XPATH, './/a[@data-automation="jobCompany"]').text
+        print(j.text)
+        return
+        title = j.find_element(By.XPATH, '//a[@data-automation="jobTitle"]').text
+        poster = j.find_element(By.XPATH, '//a[@data-automation="jobCompany"]').text
         location = extract_job_location(j)
         print(title, poster, location)
+
+
+def extract_job_location(job_elem):
+    location_elems = job_elem.find_element(
+        By.XPATH, "//a[data-automation='jobLocation']"
+    )
+    print(location_elems)
 
 
 DRIVER.get("https://seek.com.au")
 url = search("senior business analyst", "sydney")
 extract_info_from_page(url)
-
-
-def extract_job_location(job_elem):
-    location_elems = job_elem.find_element(
-        By.XPATH, ".//a[@data-automation='jobLocation']"
-    )
-    print(location_elems)
 
 
 #     where_searchbox = DRIVER.find_element(By.XPATH, '//*[@id="text-input-where"]')
